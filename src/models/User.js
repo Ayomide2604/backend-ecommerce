@@ -36,6 +36,15 @@ userSchema.pre("save", async function (next) {
 	}
 	const salt = await bcrypt.genSalt(10);
 	this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.pre("save", function (next) {
+	if (this.username) {
+		this.username = this.username.toLowerCase();
+	}
+	if (this.email) {
+		this.email = this.email.toLowerCase();
+	}
 	next();
 });
 
