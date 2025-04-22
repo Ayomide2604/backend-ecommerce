@@ -30,4 +30,20 @@ const validateCollection = (req, res, next) => {
 	}
 	next();
 };
+
+const productSchema = Joi.object({
+	name: Joi.string().min(3).required(),
+	description: Joi.string(),
+	price: Joi.number().positive().required(),
+	collection: Joi.string().min(3),
+});
+
+const validateProduct = (req, res, next) => {
+	const { error } = productSchema.validate(req.body, { abortEarly: false });
+	if (error) {
+		const errors = error.details.map((detail) => detail.message);
+		return res.status(400).json({ message: errors });
+	}
+	next();
+};
 module.exports = { validateUser, validateCollection };
