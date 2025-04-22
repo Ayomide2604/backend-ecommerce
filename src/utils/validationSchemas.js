@@ -18,4 +18,16 @@ const validateUser = (req, res, next) => {
 	next();
 };
 
-module.exports = { validateUser };
+const collectionSchema = Joi.object({
+	title: Joi.string().min(3).required(),
+});
+
+const validateCollection = (req, res, next) => {
+	const { error } = collectionSchema.validate(req.body, { abortEarly: false });
+	if (error) {
+		const errors = error.details.map((detail) => detail.message);
+		return res.status(400).json({ message: errors });
+	}
+	next();
+};
+module.exports = { validateUser, validateCollection };
