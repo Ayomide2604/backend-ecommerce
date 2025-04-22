@@ -18,7 +18,6 @@ router.post("/", protect, adminOnly, validateProduct, async (req, res) => {
 		});
 		res.status(201).json(product);
 	} catch (error) {
-		console.error(error); // Log the error for debugging
 		res
 			.status(500)
 			.json({ message: "Error Creating Product", error: error.message });
@@ -28,7 +27,7 @@ router.post("/", protect, adminOnly, validateProduct, async (req, res) => {
 // Get all Products
 router.get("/", async (req, res) => {
 	try {
-		const products = await Product.find();
+		const products = await Product.find().populate("collection");
 		res.status(200).json(products);
 	} catch (error) {
 		console.error(error); // Log the error for debugging
@@ -53,13 +52,15 @@ router.get("/:id", async (req, res) => {
 
 //  Update Product
 router.put("/:id", protect, adminOnly, validateProduct, async (req, res) => {
-	const { name, price, description } = req.body;
+	const { name, price, description, image, collection } = req.body;
 	try {
 		const product = await Product.findById(req.params.id);
 		if (!product) return res.status(404).send("No Product FOund with that ID");
 		product.name = name;
 		product.price = price;
 		product.description = description;
+		product.image = image;
+		product.collection = collection;
 		await product.save();
 		res.status(200).json(product);
 	} catch (error) {

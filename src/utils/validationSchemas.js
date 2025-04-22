@@ -46,4 +46,5 @@ const validateProduct = (req, res, next) => {
 	}
 	next();
 };
+
 module.exports = { validateUser, validateCollection, validateProduct };

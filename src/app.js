@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const collectionRoutes = require("./routes/collectionRoutes");
 
 dotenv.config();
 connectDB();
@@ -24,4 +25,5 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/collections", collectionRoutes);
 app.listen(PORT, () => console.log("Server is running on port" + PORT));
