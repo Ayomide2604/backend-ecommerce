@@ -16,10 +16,25 @@ exports.getCart = async (req, res) => {
 		});
 
 		if (!cart) {
-			return res.status(200).json({ message: "Cart is empty", items: [] });
+			return res.status(404).json({ message: "Cart is empty", items: [] });
 		}
 
-		res.status(200).json({ cart });
+		let totalPrice = 0;
+
+		const itemsWithSubTotal = cart.items.map((item) => {
+			const subTotal = item.product.price * item.quantity;
+			totalPrice += subTotal;
+			return {
+				_id: item.id,
+				product: item.product,
+				quantity: item.quantity,
+				subTotal,
+			};
+		});
+
+		res
+			.status(200)
+			.json({ cartId: cart._id, items: itemsWithSubTotal, totalPrice });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
@@ -76,19 +91,66 @@ exports.removeFromCart = async (req, res) => {
 	}
 };
 
-// Update quantity
+// Increment quantity by 1
+exports.increaseQuantity = async (req, res) => {
+	const { itemId } = req.params;
+
+	try {
+		const item = await CartItem.findById(itemId).populate("product");
+		if (!item) return res.status(404).json({ error: "Item not found" });
+
+		item.quantity += 1;
+		await item.save();
+
+		const subtotal = item.product.price * item.quantity;
+
+		res.status(200).json({ message: "Quantity increased", item, subtotal });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+// Decrease quanitity by 1
+exports.decreaseQuantity = async (req, res) => {
+	const { itemId } = req.params;
+
+	try {
+		const item = await CartItem.findById(itemId).populate("product");
+		if (!item) return res.status(404).json({ error: "Item not found" });
+
+		if (item.quantity <= 1) {
+			await item.deleteOne();
+			return res.status(200).json({ message: "Item removed from cart" });
+		}
+
+		item.quantity -= 1;
+		await item.save();
+
+		res.status(200).json({ message: "Quantity decreased", item });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 exports.updateCartItem = async (req, res) => {
 	const { itemId } = req.params;
 	const { quantity } = req.body;
 
 	try {
-		const item = await CartItem.findById(itemId);
+		const item = await CartItem.findById(itemId).populate("product");
 		if (!item) return res.status(404).json({ error: "Item not found" });
+
+		if (quantity < 1) {
+			await item.remove();
+			return res.status(200).json({ message: "Item removed from cart" });
+		}
 
 		item.quantity = quantity;
 		await item.save();
 
-		res.status(200).json({ message: "Item updated", item });
+		const subtotal = item.product.price * item.quantity;
+
+		res.status(200).json({ message: "Quantity updated", item, subtotal });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}

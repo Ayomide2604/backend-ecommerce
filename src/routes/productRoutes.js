@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 		const products = await Product.find().populate("collection");
 		res.status(200).json(products);
 	} catch (error) {
-		console.error(error); // Log the error for debugging
+		console.error(error);
 		res
 			.status(500)
 			.json({ message: "Error Fetching Products", error: error.message });
