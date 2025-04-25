@@ -5,7 +5,7 @@ const { validateProduct } = require("../utils/validationSchemas");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 // Create a new Product
-router.post("/", protect, adminOnly, validateProduct, async (req, res) => {
+router.post("/", validateProduct, async (req, res) => {
 	const { name, description, price, collection, image } = req.body;
 
 	try {
@@ -40,7 +40,9 @@ router.get("/", async (req, res) => {
 // Get a single product by Id
 router.get("/:id", async (req, res) => {
 	try {
-		const product = await Product.findById(req.params.id);
+		const product = await Product.findById(req.params.id).populate(
+			"collection"
+		);
 		if (!product) {
 			return res.status(404).send("No Product found with that ID");
 		}
@@ -51,10 +53,12 @@ router.get("/:id", async (req, res) => {
 });
 
 //  Update Product
-router.put("/:id", protect, adminOnly, validateProduct, async (req, res) => {
+router.put("/:id", validateProduct, async (req, res) => {
 	const { name, price, description, image, collection } = req.body;
 	try {
-		const product = await Product.findById(req.params.id);
+		const product = await Product.findById(req.params.id).populate(
+			"collection"
+		);
 		if (!product) return res.status(404).send("No Product FOund with that ID");
 		product.name = name;
 		product.price = price;
@@ -69,7 +73,7 @@ router.put("/:id", protect, adminOnly, validateProduct, async (req, res) => {
 });
 
 // Delete Product
-router.delete("/:id", protect, adminOnly, async (req, res) => {
+router.delete("/:id", async (req, res) => {
 	const { id } = req.params;
 
 	try {

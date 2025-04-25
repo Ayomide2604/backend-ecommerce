@@ -6,7 +6,7 @@ const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 //  Create a new Collection
 
-router.post("/", protect, adminOnly, validateCollection, async (req, res) => {
+router.post("/", validateCollection, async (req, res) => {
 	const { title } = req.body;
 
 	try {
@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
 		const collections = await Collection.find();
 		if (!collections)
 			return res.status(404).json({ message: "No collections found" });
-		res.status(200).json({ collections });
+		res.status(200).json(collections);
 	} catch (error) {
 		res
 			.status(500)
@@ -49,7 +49,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //  Update Collection
-router.put("/:id", protect, adminOnly, validateCollection, async (req, res) => {
+router.put("/:id", validateCollection, async (req, res) => {
 	const { title } = req.body;
 	try {
 		const collection = await Collection.findById(req.params.id);
@@ -65,7 +65,7 @@ router.put("/:id", protect, adminOnly, validateCollection, async (req, res) => {
 });
 
 //  Delete Collection
-router.delete("/:id", protect, adminOnly, async (req, res) => {
+router.delete("/:id", async (req, res) => {
 	const { id } = req.params;
 
 	try {

@@ -15,11 +15,10 @@ const productSchema = new mongoose.Schema(
 		collection: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Collection",
+			required: true, 
 		},
 	},
 	{ timestamps: true }
 );
-
-
 
 module.exports = mongoose.model("Product", productSchema);
