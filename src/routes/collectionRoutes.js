@@ -4,23 +4,6 @@ const Collection = require("../models/Collection");
 const { validateCollection } = require("../utils/validationSchemas");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
-//  Create a new Collection
-
-router.post("/", validateCollection, async (req, res) => {
-	const { title } = req.body;
-
-	try {
-		const collection = await Collection.create({ title });
-		res
-			.status(201)
-			.json({ message: "Collection created successfully", collection });
-	} catch (error) {
-		res
-			.status(500)
-			.json({ message: "Error Creating Collection", error: error.message });
-	}
-});
-
 // Get all Collections
 router.get("/", async (req, res) => {
 	try {
@@ -48,13 +31,30 @@ router.get("/:id", async (req, res) => {
 	}
 });
 
+//  Create a new Collection
+
+router.post("/", validateCollection, async (req, res) => {
+	const { title } = req.body;
+
+	try {
+		const collection = await Collection.create({ title });
+		res
+			.status(201)
+			.json({ message: "Collection created successfully", collection });
+	} catch (error) {
+		res
+			.status(500)
+			.json({ message: "Error Creating Collection", error: error.message });
+	}
+});
+
 //  Update Collection
 router.put("/:id", validateCollection, async (req, res) => {
 	const { title } = req.body;
 	try {
 		const collection = await Collection.findById(req.params.id);
 		if (!collection)
-			return res.status(404).send("No Collection FOund with that ID");
+			return res.status(404).send("No Collection Found with that ID");
 		collection.title = title;
 
 		await collection.save();
