@@ -1,6 +1,5 @@
 const Cart = require("../models/Cart");
 const CartItem = require("../models/CartItem");
-const Product = require("../models/Product");
 
 // View cart
 exports.getCart = async (req, res) => {
@@ -44,29 +43,30 @@ exports.getCart = async (req, res) => {
 exports.addToCart = async (req, res) => {
 	const { productId, quantity } = req.body;
 	const userId = req.user._id;
-
 	try {
 		let cart = await Cart.findOne({ user: userId }).populate("items");
 		if (!cart) {
 			cart = new Cart({ user: userId, items: [] });
 		}
-		let item = cart.items.find(
-			(item) => item.product._id.toString() === productId
-		);
+
+		let item = cart.items.find((item) => item.product.toString() === productId);
+
+		const qty = quantity || 1;
+
 		if (item) {
-			item.quantity += quantity || 1;
+			item.quantity += qty;
 			await item.save();
 		} else {
 			const newItem = new CartItem({
 				product: productId,
-				quantity: quantity || 1,
+				quantity: qty,
 			});
 
 			await newItem.save();
 			cart.items.push(newItem);
 		}
 		await cart.save();
-		res.status(200).json({ message: "Item Added to Cart ", cart });
+		res.status(200).json({ message: "Item Added to Cart", cart });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
@@ -101,7 +101,7 @@ exports.increaseQuantity = async (req, res) => {
 
 		item.quantity += 1;
 		await item.save();
-
+ 
 		const subtotal = item.product.price * item.quantity;
 
 		res.status(200).json({ message: "Quantity increased", item, subtotal });

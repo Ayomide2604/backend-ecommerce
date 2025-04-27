@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const collectionRoutes = require("./routes/collectionRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 dotenv.config();
 connectDB();
@@ -30,4 +31,5 @@ app.use("/api", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/collections", collectionRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
 app.listen(PORT, () => console.log("Server is running on port" + PORT));

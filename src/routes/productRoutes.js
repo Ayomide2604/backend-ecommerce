@@ -21,8 +21,22 @@ const upload = multer({ storage: storage });
 // Get all Products
 router.get("/", async (req, res) => {
 	try {
-		const products = await Product.find().populate("collection");
-		res.status(200).json(products);
+		let { page = 1, limit = 10, sort = "-createdAt" } = req.query;
+		page = parseInt(page);
+		limit = parseInt(limit);
+
+		const skip = (page - 1) * limit;
+
+		const products = await Product.find()
+			.populate("collection")
+			.sort(sort)
+			.skip(skip)
+			.limit(limit);
+
+		const productCount = await Product.countDocuments();
+		const totalPages = Math.ceil(productCount / limit);
+
+		res.status(200).json({ productCount, totalPages, page, limit, products });
 	} catch (error) {
 		console.error(error);
 		res
@@ -47,30 +61,39 @@ router.get("/:id", async (req, res) => {
 });
 
 // Create a new Product
-router.post("/", validateProduct, upload.single("image"), async (req, res) => {
-	const { name, description, price, collection } = req.body;
-	const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+router.post(
+	"/",
+	validateProduct,
+	protect,
+	adminOnly,
+	upload.single("image"),
+	async (req, res) => {
+		const { name, description, price, collection } = req.body;
+		const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-	try {
-		const product = await Product.create({
-			name,
-			description,
-			price,
-			collection,
-			image: imagePath,
-		});
-		res.status(201).json(product);
-	} catch (error) {
-		res
-			.status(500)
-			.json({ message: "Error Creating Product", error: error.message });
+		try {
+			const product = await Product.create({
+				name,
+				description,
+				price,
+				collection,
+				image: imagePath,
+			});
+			res.status(201).json(product);
+		} catch (error) {
+			res
+				.status(500)
+				.json({ message: "Error Creating Product", error: error.message });
+		}
 	}
-});
+);
 
 //  Update Product
 router.put(
 	"/:id",
 	validateProduct,
+	protect,
+	adminOnly,
 	upload.single("image"),
 	async (req, res) => {
 		const { name, price, description, image, collection } = req.body;
@@ -95,7 +118,7 @@ router.put(
 );
 
 // Delete Product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, adminOnly, async (req, res) => {
 	const { id } = req.params;
 
 	try {
