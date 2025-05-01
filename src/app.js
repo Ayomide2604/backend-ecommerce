@@ -20,9 +20,10 @@ app.use("/uploads", express.static("uploads"));
 
 app.use(
 	cors({
-		origin: ["http://localhost:5173"],
-		methods: "GET, POST, PUT, PATCH, DELETE",
-		allowedHeaders: "Content-Type, Authorization",
+		origin: ["http://localhost:5173", "https://frontend-ecom-orcin.vercel.app"],
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
 	})
 );
 
